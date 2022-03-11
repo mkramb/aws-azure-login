@@ -126,59 +126,12 @@ const states = [
   },
   {
     name: "account selection",
-    selector: `#aadTile > div > div.table-cell.tile-img > img`,
+    selector: `.tile-container`,
     async handler(page: puppeteer.Page): Promise<void> {
-      debug("Multiple accounts associated with username.");
-      const aadTile = await page.$("#aadTileTitle");
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const aadTileMessage: string = await page.evaluate(
-        // eslint-disable-next-line
-        (a) => a.textContent,
-        aadTile
-      );
+      debug(`Proceeding with first account`);
+      // TODO: Implement handling of multiple account
 
-      const msaTile = await page.$("#msaTileTitle");
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const msaTileMessage: string = await page.evaluate(
-        // eslint-disable-next-line
-        (m) => m.textContent,
-        msaTile
-      );
-
-      const accounts = [
-        { message: aadTileMessage, selector: "#aadTileTitle" },
-        { message: msaTileMessage, selector: "#msaTileTitle" },
-      ];
-
-      let account;
-      if (accounts.length === 0) {
-        throw new CLIError("No accounts found on account selection screen.");
-      } else if (accounts.length === 1) {
-        account = accounts[0];
-      } else {
-        debug("Asking user to choose account");
-        console.log(
-          "It looks like this Username is used with more than one account from Microsoft. Which one do you want to use?"
-        );
-        const answers = await inquirer.prompt([
-          {
-            name: "account",
-            message: "Account:",
-            type: "list",
-            choices: _.map(accounts, "message"),
-            default: aadTileMessage,
-          } as Question,
-        ]);
-
-        account = _.find(accounts, ["message", answers.account]);
-      }
-
-      if (!account) {
-        throw new Error("Unable to find account");
-      }
-
-      debug(`Proceeding with account ${account.selector}`);
-      await page.click(account.selector);
+      await page.click(`${this.selector} .table-row:first-child`);
       await Bluebird.delay(500);
     },
   },
